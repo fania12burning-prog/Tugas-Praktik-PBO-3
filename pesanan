@@ -1,0 +1,216 @@
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+/**
+ * Kelas Pesanan - Mencatat pesanan pelanggan
+ * Implementasi ArrayList untuk menyimpan item-item pesanan
+ */
+public class Pesanan {
+    private String noPesanan;
+    private String namaPelanggan;
+    private ArrayList<ItemPesanan> daftarItem;
+    private Date tanggalPesanan;
+    private Diskon diskonTerpilih;
+    private static int nomorPesananCounter = 1;
+
+    /**
+     * Konstruktor Pesanan
+     * @param namaPelanggan nama pelanggan yang melakukan pesanan
+     */
+    public Pesanan(String namaPelanggan) {
+        this.noPesanan = "PES-" + String.format("%05d", nomorPesananCounter++);
+        this.namaPelanggan = namaPelanggan;
+        this.daftarItem = new ArrayList<>();
+        this.tanggalPesanan = new Date();
+        this.diskonTerpilih = null;
+    }
+
+    // Getter dan Setter
+    public String getNoPesanan() {
+        return noPesanan;
+    }
+
+    public String getNamaPelanggan() {
+        return namaPelanggan;
+    }
+
+    public ArrayList<ItemPesanan> getDaftarItem() {
+        return daftarItem;
+    }
+
+    public Date getTanggalPesanan() {
+        return tanggalPesanan;
+    }
+
+    public Diskon getDiskonTerpilih() {
+        return diskonTerpilih;
+    }
+
+    public void setDiskonTerpilih(Diskon diskon) {
+        this.diskonTerpilih = diskon;
+    }
+
+    /**
+     * Menambahkan item ke pesanan
+     * @param item item yang akan ditambahkan
+     * @throws Exception jika item adalah Diskon
+     */
+    public void tambahItem(MenuItem item, int jumlah) throws Exception {
+        if (item instanceof Diskon) {
+            throw new Exception("❌ Tidak bisa menambahkan Diskon sebagai item pesanan! Gunakan fitur 'Terapkan Diskon'");
+        }
+
+        if (jumlah <= 0) {
+            throw new Exception("❌ Jumlah item harus lebih dari 0!");
+        }
+
+        // Cek apakah item sudah ada di pesanan
+        for (ItemPesanan ip : daftarItem) {
+            if (ip.getMenuItem().getNama().equals(item.getNama())) {
+                ip.setJumlah(ip.getJumlah() + jumlah);
+                System.out.println("✓ Jumlah item '" + item.getNama() + "' diperbarui menjadi " + ip.getJumlah());
+                return;
+            }
+        }
+
+        // Item baru, tambahkan ke daftar
+        daftarItem.add(new ItemPesanan(item, jumlah));
+        System.out.println("✓ Item '" + item.getNama() + "' ditambahkan ke pesanan!");
+    }
+
+    /**
+     * Menghapus item dari pesanan berdasarkan nama
+     * @param nama nama item yang akan dihapus
+     * @throws Exception jika item tidak ditemukan
+     */
+    public void hapusItem(String nama) throws Exception {
+        boolean ditemukan = false;
+        for (int i = 0; i < daftarItem.size(); i++) {
+            if (daftarItem.get(i).getMenuItem().getNama().equalsIgnoreCase(nama)) {
+                daftarItem.remove(i);
+                System.out.println("✓ Item '" + nama + "' dihapus dari pesanan!");
+                ditemukan = true;
+                break;
+            }
+        }
+        if (!ditemukan) {
+            throw new Exception("❌ Item '" + nama + "' tidak ditemukan dalam pesanan!");
+        }
+    }
+
+    /**
+     * Menghitung total biaya pesanan sebelum diskon
+     */
+    public double hitungSubtotal() {
+        double subtotal = 0;
+        for (ItemPesanan item : daftarItem) {
+            subtotal += item.hitungSubtotal();
+        }
+        return subtotal;
+    }
+
+    /**
+     * Menghitung jumlah diskon
+     */
+    public double hitungJumlahDiskon() {
+        if (diskonTerpilih == null) {
+            return 0;
+        }
+        return diskonTerpilih.hitungJumlahDiskon(hitungSubtotal());
+    }
+
+    /**
+     * Menghitung total biaya pesanan setelah diskon
+     */
+    public double hitungTotal() {
+        return hitungSubtotal() - hitungJumlahDiskon();
+    }
+
+    /**
+     * Menampilkan detail pesanan
+     */
+    public void tampilDetailPesanan() {
+        System.out.println("\n╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║                    DETAIL PESANAN                             ║");
+        System.out.println("╠═══════════════════════════════════════════════════════════════╣");
+        System.out.printf("║ No. Pesanan  : %-55s ║\n", noPesanan);
+        System.out.printf("║ Nama         : %-55s ║\n", namaPelanggan);
+        System.out.printf("║ Tanggal      : %-55s ║\n", new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(tanggalPesanan));
+        System.out.println("╠═══════════════════════════════════════════════════════════════╣");
+
+        if (daftarItem.isEmpty()) {
+            System.out.println("║ Belum ada item dalam pesanan ini!                              ║");
+        } else {
+            System.out.println("║ DETAIL ITEM:                                                   ║");
+            System.out.println("╠═══════════════════════════════════════════════════════════════╣");
+            int no = 1;
+            for (ItemPesanan item : daftarItem) {
+                String nama = item.getMenuItem().getNama();
+                double harga = item.getMenuItem().getHarga();
+                int jumlah = item.getJumlah();
+                double subtotal = item.hitungSubtotal();
+                System.out.printf("║ %d. %-15s × %3d = Rp %,15.0f      ║\n", no++, nama, jumlah, subtotal);
+            }
+        }
+
+        System.out.println("╠═══════════════════════════════════════════════════════════════╣");
+        System.out.printf("║ Subtotal     : Rp %,49.0f ║\n", hitungSubtotal());
+        if (diskonTerpilih != null) {
+            System.out.printf("║ Diskon (%s) : -Rp %,47.0f ║\n", 
+                diskonTerpilih.getNama(), hitungJumlahDiskon());
+        }
+        System.out.printf("║ TOTAL        : Rp %,49.0f ║\n", hitungTotal());
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝\n");
+    }
+
+    /**
+     * Menyimpan struk pesanan ke file
+     */
+    public void simpanStrukKeFile() {
+        String namaFile = "struk_" + noPesanan + ".txt";
+        try (PrintWriter writer = new PrintWriter(new FileWriter(namaFile))) {
+            writer.println("═══════════════════════════════════════════════════════════");
+            writer.println("                    STRUK PESANAN                          ");
+            writer.println("═══════════════════════════════════════════════════════════");
+            writer.println();
+            writer.println("No. Pesanan  : " + noPesanan);
+            writer.println("Nama         : " + namaPelanggan);
+            writer.println("Tanggal      : " + new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(tanggalPesanan));
+            writer.println();
+            writer.println("───────────────────────────────────────────────────────────");
+            writer.println("DETAIL ITEM:");
+            writer.println("───────────────────────────────────────────────────────────");
+
+            int no = 1;
+            for (ItemPesanan item : daftarItem) {
+                writer.printf("%d. %-20s × %3d = Rp %,15.0f\n", 
+                    no++, item.getMenuItem().getNama(), item.getJumlah(), item.hitungSubtotal());
+            }
+
+            writer.println("───────────────────────────────────────────────────────────");
+            writer.printf("Subtotal     : Rp %,25.0f\n", hitungSubtotal());
+            if (diskonTerpilih != null) {
+                writer.printf("Diskon (%s) : -Rp %,23.0f\n", 
+                    diskonTerpilih.getNama(), hitungJumlahDiskon());
+            }
+            writer.printf("TOTAL        : Rp %,25.0f\n", hitungTotal());
+            writer.println("───────────────────────────────────────────────────────────");
+            writer.println();
+            writer.println("Terima kasih telah berbelanja!");
+            writer.println("═══════════════════════════════════════════════════════════");
+
+            System.out.println("✓ Struk berhasil disimpan ke file: " + namaFile);
+        } catch (IOException e) {
+            System.err.println("❌ Gagal menyimpan struk: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Getter jumlah item dalam pesanan
+     */
+    public int getJumlahItem() {
+        return daftarItem.size();
+    }
+}
