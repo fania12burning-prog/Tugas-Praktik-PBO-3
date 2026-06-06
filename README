@@ -1,0 +1,17 @@
+## Program Manajemen Restoran - Tugas Praktik PBO 3
+
+Program Java untuk manajemen restoran yang mengimplementasikan konsep-konsep pemrograman berorientasi objek.
+
+### 📋 Indikator Pembelajaran yang Dicapai
+
+✅ **Abstraksi**: Kelas abstrak `MenuItem` sebagai dasar untuk semua item menu
+✅ **Inheritance**: Tiga kelas turunan (`Makanan`, `Minuman`, `Diskon`) dari `MenuItem`
+✅ **Encapsulation**: Atribut private dengan getter/setter pada semua kelas
+✅ **Polymorphism**: Implementasi metode abstrak `tampilMenu()` di setiap subkelas
+✅ **Exception Handling**: Penanganan exception untuk berbagai kesalahan input
+✅ **File I/O Operations**: Penyimpanan dan pemuatan menu dari file, serta penyimpanan struk
+✅ **Struktur Keputusan & Pengulangan**: Menu interaktif dengan kontrol alur program
+
+---
+
+### 📁 Struktur File Project
