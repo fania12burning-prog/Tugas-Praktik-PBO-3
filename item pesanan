@@ -1,0 +1,54 @@
+/**
+ * Kelas ItemPesanan - Merepresentasikan satu item dalam pesanan
+ * Digunakan untuk menyimpan referensi item menu dan jumlahnya
+ */
+public class ItemPesanan {
+    private MenuItem menuItem;
+    private int jumlah;
+
+    /**
+     * Konstruktor ItemPesanan
+     * @param menuItem item menu yang dipesan
+     * @param jumlah jumlah item yang dipesan
+     */
+    public ItemPesanan(MenuItem menuItem, int jumlah) {
+        if (menuItem == null) {
+            throw new IllegalArgumentException("Menu item tidak boleh null!");
+        }
+        if (jumlah <= 0) {
+            throw new IllegalArgumentException("Jumlah harus lebih dari 0!");
+        }
+        this.menuItem = menuItem;
+        this.jumlah = jumlah;
+    }
+
+    // Getter dan Setter
+    public MenuItem getMenuItem() {
+        return menuItem;
+    }
+
+    public int getJumlah() {
+        return jumlah;
+    }
+
+    public void setJumlah(int jumlah) {
+        if (jumlah <= 0) {
+            throw new IllegalArgumentException("Jumlah harus lebih dari 0!");
+        }
+        this.jumlah = jumlah;
+    }
+
+    /**
+     * Menghitung subtotal untuk item ini
+     */
+    public double hitungSubtotal() {
+        return menuItem.getHarga() * jumlah;
+    }
+
+    /**
+     * Format untuk menyimpan ke file
+     */
+    public String toFileFormat() {
+        return menuItem.getNama() + "|" + jumlah + "|" + hitungSubtotal();
+    }
+}
