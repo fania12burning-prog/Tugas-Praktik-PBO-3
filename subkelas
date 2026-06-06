@@ -1,0 +1,3 @@
+public class Makanan extends MenuItem { ... }
+public class Minuman extends MenuItem { ... }
+public class Diskon extends MenuItem { ... }
