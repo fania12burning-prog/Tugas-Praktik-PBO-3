@@ -1,0 +1,414 @@
+import java.util.Scanner;
+import java.util.ArrayList;
+
+/**
+ * Kelas Restoran - Program utama untuk manajemen restoran
+ * Menggabungkan semua komponen: Menu, Pesanan, MenuItem, dan subkelas-nya
+ * Mengimplementasikan konsep abstraksi, inheritance, encapsulation, polymorphism, exception handling
+ */
+public class Restoran {
+    private Menu menu;
+    private ArrayList<Pesanan> daftarPesanan;
+    private Pesanan pesananAktif;
+    private Scanner scanner;
+
+    /**
+     * Konstruktor Restoran
+     */
+    public Restoran() {
+        this.menu = new Menu();
+        this.daftarPesanan = new ArrayList<>();
+        this.pesananAktif = null;
+        this.scanner = new Scanner(System.in);
+    }
+
+    /**
+     * Menampilkan menu utama program
+     */
+    public void tampilMenuUtama() {
+        System.out.println("\n╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║         SELAMAT DATANG DI RESTORAN KAMI                       ║");
+        System.out.println("╠═══════════════════════════════════════════════════════════════╣");
+        System.out.println("║ 1. Tambah Item Menu                                           ║");
+        System.out.println("║ 2. Hapus Item Menu                                            ║");
+        System.out.println("║ 3. Tampil Menu Restoran                                       ║");
+        System.out.println("║ 4. Buat Pesanan Baru                                          ║");
+        System.out.println("║ 5. Tambah Item ke Pesanan                                     ║");
+        System.out.println("║ 6. Hapus Item dari Pesanan                                    ║");
+        System.out.println("║ 7. Terapkan Diskon pada Pesanan                               ║");
+        System.out.println("║ 8. Tampil Detail Pesanan Aktif                                ║");
+        System.out.println("║ 9. Selesaikan Pesanan & Simpan Struk                          ║");
+        System.out.println("║ 10. Lihat Riwayat Pesanan                                     ║");
+        System.out.println("║ 0. Keluar dari Program                                        ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
+    }
+
+    /**
+     * Fitur 1: Tambah Item Menu
+     */
+    private void tambahItemMenu() {
+        System.out.println("\n╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║            TAMBAH ITEM MENU                                   ║");
+        System.out.println("╠═══════════════════════════════════════════════════════════════╣");
+        System.out.println("║ Pilih Jenis Item:                                             ║");
+        System.out.println("║ 1. Makanan                                                    ║");
+        System.out.println("║ 2. Minuman                                                    ║");
+        System.out.println("║ 3. Diskon                                                     ║");
+        System.out.println("║ 0. Kembali                                                    ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
+        System.out.print("Pilihan: ");
+        int pilihan = inputInteger();
+
+        try {
+            switch (pilihan) {
+                case 1:
+                    tambahMakanan();
+                    break;
+                case 2:
+                    tambahMinuman();
+                    break;
+                case 3:
+                    tambahDiskon();
+                    break;
+                case 0:
+                    break;
+                default:
+                    System.out.println("❌ Pilihan tidak valid!");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Sub-fungsi untuk tambah makanan
+     */
+    private void tambahMakanan() {
+        System.out.print("Nama Makanan: ");
+        String nama = scanner.nextLine();
+        System.out.print("Harga: Rp ");
+        double harga = inputDouble();
+        System.out.print("Jenis Makanan (Nasi/Mie/Ayam/Ikan/Sayur): ");
+        String jenis = scanner.nextLine();
+
+        Makanan makanan = new Makanan(nama, harga, "Makanan", jenis);
+        menu.tambahItem(makanan);
+    }
+
+    /**
+     * Sub-fungsi untuk tambah minuman
+     */
+    private void tambahMinuman() {
+        System.out.print("Nama Minuman: ");
+        String nama = scanner.nextLine();
+        System.out.print("Harga: Rp ");
+        double harga = inputDouble();
+        System.out.print("Jenis Minuman (Kopi/Jus/Teh/Soda/Air): ");
+        String jenis = scanner.nextLine();
+
+        Minuman minuman = new Minuman(nama, harga, "Minuman", jenis);
+        menu.tambahItem(minuman);
+    }
+
+    /**
+     * Sub-fungsi untuk tambah diskon
+     */
+    private void tambahDiskon() {
+        System.out.print("Nama Diskon/Promo: ");
+        String nama = scanner.nextLine();
+        System.out.print("Minimum Pembelian: Rp ");
+        double minimalBeli = inputDouble();
+        System.out.print("Persentase Diskon (%): ");
+        double persentase = inputDouble();
+
+        if (persentase <= 0 || persentase > 100) {
+            throw new IllegalArgumentException("Persentase diskon harus antara 0-100%");
+        }
+
+        Diskon diskon = new Diskon(nama, minimalBeli, "Diskon", persentase);
+        menu.tambahItem(diskon);
+    }
+
+    /**
+     * Fitur 2: Hapus Item Menu
+     */
+    private void hapusItemMenu() {
+        System.out.print("\nMasukkan nama item yang akan dihapus: ");
+        String nama = scanner.nextLine();
+        try {
+            menu.hapusItem(nama);
+        } catch (Exception e) {
+            System.err.println("❌ " + e.getMessage());
+        }
+    }
+
+    /**
+     * Fitur 3: Tampil Menu Restoran
+     */
+    private void tampilMenuRestoran() {
+        menu.tampilMenuBerdasarkanKategori();
+    }
+
+    /**
+     * Fitur 4: Buat Pesanan Baru
+     */
+    private void buatPesananBaru() {
+        System.out.print("\nMasukkan nama pelanggan: ");
+        String nama = scanner.nextLine();
+        pesananAktif = new Pesanan(nama);
+        System.out.println("✓ Pesanan baru dibuat! No. Pesanan: " + pesananAktif.getNoPesanan());
+    }
+
+    /**
+     * Fitur 5: Tambah Item ke Pesanan
+     */
+    private void tambahItemKePesanan() {
+        if (pesananAktif == null) {
+            System.out.println("❌ Silakan buat pesanan baru terlebih dahulu!");
+            return;
+        }
+
+        menu.tampilMenuBerdasarkanKategori();
+
+        System.out.print("\nMasukkan nama item yang ingin dipesan: ");
+        String namaItem = scanner.nextLine();
+
+        MenuItem item = menu.cariItem(namaItem);
+        if (item == null) {
+            System.out.println("❌ Item '" + namaItem + "' tidak ditemukan dalam menu!");
+            return;
+        }
+
+        System.out.print("Jumlah: ");
+        int jumlah = inputInteger();
+
+        try {
+            pesananAktif.tambahItem(item, jumlah);
+        } catch (Exception e) {
+            System.err.println("❌ " + e.getMessage());
+        }
+    }
+
+    /**
+     * Fitur 6: Hapus Item dari Pesanan
+     */
+    private void hapusItemDariPesanan() {
+        if (pesananAktif == null) {
+            System.out.println("❌ Tidak ada pesanan aktif!");
+            return;
+        }
+
+        if (pesananAktif.getJumlahItem() == 0) {
+            System.out.println("❌ Pesanan tidak memiliki item apapun!");
+            return;
+        }
+
+        System.out.print("\nMasukkan nama item yang akan dihapus: ");
+        String nama = scanner.nextLine();
+        try {
+            pesananAktif.hapusItem(nama);
+        } catch (Exception e) {
+            System.err.println("❌ " + e.getMessage());
+        }
+    }
+
+    /**
+     * Fitur 7: Terapkan Diskon
+     */
+    private void terapkanDiskon() {
+        if (pesananAktif == null) {
+            System.out.println("❌ Tidak ada pesanan aktif!");
+            return;
+        }
+
+        ArrayList<MenuItem> daftarDiskon = new ArrayList<>();
+        for (MenuItem item : menu.getDaftarMenu()) {
+            if (item instanceof Diskon) {
+                daftarDiskon.add(item);
+            }
+        }
+
+        if (daftarDiskon.isEmpty()) {
+            System.out.println("❌ Tidak ada diskon yang tersedia!");
+            return;
+        }
+
+        System.out.println("\n╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║                    DISKON TERSEDIA                           ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
+        for (int i = 0; i < daftarDiskon.size(); i++) {
+            Diskon d = (Diskon) daftarDiskon.get(i);
+            System.out.printf("%d. %s (Min Rp %.0f, Diskon %.2f%%)\n", 
+                i + 1, d.getNama(), d.getHarga(), d.getPersentaseDiskon());
+        }
+
+        System.out.print("Pilih diskon (0 untuk batal): ");
+        int pilihan = inputInteger();
+
+        if (pilihan > 0 && pilihan <= daftarDiskon.size()) {
+            Diskon diskon = (Diskon) daftarDiskon.get(pilihan - 1);
+            double subtotal = pesananAktif.hitungSubtotal();
+            
+            if (subtotal >= diskon.getHarga()) {
+                pesananAktif.setDiskonTerpilih(diskon);
+                System.out.println("✓ Diskon '" + diskon.getNama() + "' berhasil diterapkan!");
+                System.out.printf("  Potongan: Rp %.0f\n", diskon.hitungJumlahDiskon(subtotal));
+            } else {
+                System.out.printf("❌ Total pembelian (Rp %.0f) belum mencapai minimum (Rp %.0f)!\n", 
+                    subtotal, diskon.getHarga());
+            }
+        }
+    }
+
+    /**
+     * Fitur 8: Tampil Detail Pesanan
+     */
+    private void tampilDetailPesanan() {
+        if (pesananAktif == null) {
+            System.out.println("❌ Tidak ada pesanan aktif!");
+            return;
+        }
+        pesananAktif.tampilDetailPesanan();
+    }
+
+    /**
+     * Fitur 9: Selesaikan Pesanan & Simpan Struk
+     */
+    private void selesaikanPesanan() {
+        if (pesananAktif == null) {
+            System.out.println("❌ Tidak ada pesanan aktif!");
+            return;
+        }
+
+        if (pesananAktif.getJumlahItem() == 0) {
+            System.out.println("❌ Pesanan tidak memiliki item apapun!");
+            return;
+        }
+
+        pesananAktif.tampilDetailPesanan();
+        System.out.print("Konfirmasi selesaikan pesanan? (y/n): ");
+        String konfirmasi = scanner.nextLine();
+
+        if (konfirmasi.equalsIgnoreCase("y")) {
+            pesananAktif.simpanStrukKeFile();
+            daftarPesanan.add(pesananAktif);
+            System.out.println("✓ Pesanan berhasil disimpan!");
+            pesananAktif = null;
+        }
+    }
+
+    /**
+     * Fitur 10: Lihat Riwayat Pesanan
+     */
+    private void lihatRiwayatPesanan() {
+        if (daftarPesanan.isEmpty()) {
+            System.out.println("\n📋 Belum ada riwayat pesanan!");
+            return;
+        }
+
+        System.out.println("\n╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║                    RIWAYAT PESANAN                            ║");
+        System.out.println("╠═══════════════════════════════════════════════════════════════╣");
+
+        for (int i = 0; i < daftarPesanan.size(); i++) {
+            Pesanan p = daftarPesanan.get(i);
+            System.out.printf("║ %d. No: %-15s | Nama: %-20s | Total: Rp %,10.0f ║\n",
+                i + 1, p.getNoPesanan(), p.getNamaPelanggan(), p.hitungTotal());
+        }
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
+    }
+
+    /**
+     * Helper method untuk input integer
+     */
+    private int inputInteger() {
+        try {
+            int value = Integer.parseInt(scanner.nextLine());
+            return value;
+        } catch (NumberFormatException e) {
+            System.err.println("❌ Input harus berupa angka!");
+            return -1;
+        }
+    }
+
+    /**
+     * Helper method untuk input double
+     */
+    private double inputDouble() {
+        try {
+            double value = Double.parseDouble(scanner.nextLine());
+            return value;
+        } catch (NumberFormatException e) {
+            System.err.println("❌ Input harus berupa angka!");
+            return -1;
+        }
+    }
+
+    /**
+     * Method utama untuk menjalankan program
+     */
+    public void jalankan() {
+        System.out.println("\n╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║   PROGRAM MANAJEMEN RESTORAN - TUGAS PRAKTIK PBO 3           ║");
+        System.out.println("║   Implementasi: Abstraksi, Inheritance, Encapsulation,       ║");
+        System.out.println("║   Polymorphism, Exception Handling, dan File I/O             ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝");
+
+        boolean running = true;
+        while (running) {
+            tampilMenuUtama();
+            System.out.print("Pilihan: ");
+            int pilihan = inputInteger();
+
+            switch (pilihan) {
+                case 1:
+                    tambahItemMenu();
+                    break;
+                case 2:
+                    hapusItemMenu();
+                    break;
+                case 3:
+                    tampilMenuRestoran();
+                    break;
+                case 4:
+                    buatPesananBaru();
+                    break;
+                case 5:
+                    tambahItemKePesanan();
+                    break;
+                case 6:
+                    hapusItemDariPesanan();
+                    break;
+                case 7:
+                    terapkanDiskon();
+                    break;
+                case 8:
+                    tampilDetailPesanan();
+                    break;
+                case 9:
+                    selesaikanPesanan();
+                    break;
+                case 10:
+                    lihatRiwayatPesanan();
+                    break;
+                case 0:
+                    System.out.println("\n👋 Terima kasih telah menggunakan program Manajemen Restoran!");
+                    System.out.println("📁 Menu tersimpan dalam file menu.txt");
+                    System.out.println("📄 Struk pesanan tersimpan dengan nama struk_[NoPesanan].txt");
+                    running = false;
+                    break;
+                default:
+                    System.out.println("❌ Pilihan tidak valid!");
+            }
+        }
+        scanner.close();
+    }
+
+    /**
+     * Method main untuk menjalankan program
+     */
+    public static void main(String[] args) {
+        Restoran restoran = new Restoran();
+        restoran.jalankan();
+    }
+}
