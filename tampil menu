@@ -1,0 +1,41 @@
+
+---
+
+### 🎯 Fitur Utama Program
+
+#### 1. **Manajemen Menu**
+- ➕ Tambah item menu (Makanan, Minuman, Diskon)
+- ➖ Hapus item menu
+- 📋 Tampil menu berdasarkan kategori
+- 💾 Auto-save menu ke file `menu.txt`
+- 📂 Auto-load menu dari file saat program dimulai
+
+#### 2. **Pemesanan Pesanan**
+- 🆕 Buat pesanan baru dengan nomor otomatis (PES-00001, dst)
+- ➕ Tambah item ke pesanan dengan pengecekan validasi
+- ➖ Hapus item dari pesanan
+- 🎉 Terapkan diskon dengan validasi minimum pembelian
+
+#### 3. **Perhitungan & Pembayaran**
+- 💰 Perhitungan subtotal otomatis
+- 🏷️ Perhitungan potongan diskon berdasarkan persentase
+- 💵 Perhitungan total akhir dengan akurat
+- 📄 Cetak struk pesanan ke file
+
+#### 4. **Laporan & History**
+- 📜 Lihat detail pesanan aktif
+- 📊 Lihat riwayat semua pesanan
+- 🗂️ Struk tersimpan dalam file terpisah
+
+---
+
+### 🔍 Detail Implementasi
+
+#### **MenuItem.java** (Kelas Abstrak)
+```java
+public abstract class MenuItem {
+    private String nama;
+    private double harga;
+    private String kategori;
+    public abstract void tampilMenu();
+}
