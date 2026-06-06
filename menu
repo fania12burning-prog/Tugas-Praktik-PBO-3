@@ -1,0 +1,233 @@
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+/**
+ * Kelas Menu - Mengelola semua item menu restoran
+ * Implementasi encapsulation dengan ArrayList private
+ */
+public class Menu {
+    private ArrayList<MenuItem> daftarMenu;
+    private static final String FILE_MENU = "menu.txt";
+
+    /**
+     * Konstruktor Menu
+     */
+    public Menu() {
+        this.daftarMenu = new ArrayList<>();
+        muatMenuDariFile();
+    }
+
+    /**
+     * Menambahkan item menu baru
+     * @param item item menu yang akan ditambahkan
+     */
+    public void tambahItem(MenuItem item) {
+        if (item == null) {
+            throw new IllegalArgumentException("Item menu tidak boleh null!");
+        }
+        daftarMenu.add(item);
+        System.out.println("✓ Item menu '" + item.getNama() + "' berhasil ditambahkan!");
+        simpanMenuKeFile();
+    }
+
+    /**
+     * Menghapus item menu berdasarkan nama
+     * @param nama nama item yang akan dihapus
+     * @throws Exception jika item tidak ditemukan
+     */
+    public void hapusItem(String nama) throws Exception {
+        boolean ditemukan = false;
+        for (int i = 0; i < daftarMenu.size(); i++) {
+            if (daftarMenu.get(i).getNama().equalsIgnoreCase(nama)) {
+                daftarMenu.remove(i);
+                System.out.println("✓ Item menu '" + nama + "' berhasil dihapus!");
+                simpanMenuKeFile();
+                ditemukan = true;
+                break;
+            }
+        }
+        if (!ditemukan) {
+            throw new Exception("❌ Item menu '" + nama + "' tidak ditemukan!");
+        }
+    }
+
+    /**
+     * Mencari item menu berdasarkan nama
+     * @param nama nama item yang dicari
+     * @return MenuItem jika ditemukan, null jika tidak
+     */
+    public MenuItem cariItem(String nama) {
+        for (MenuItem item : daftarMenu) {
+            if (item.getNama().equalsIgnoreCase(nama)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Menampilkan semua item menu berdasarkan kategori
+     */
+    public void tampilMenuBerdasarkanKategori() {
+        if (daftarMenu.isEmpty()) {
+            System.out.println("📋 Menu masih kosong!");
+            return;
+        }
+
+        System.out.println("\n╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║              DAFTAR MENU RESTORAN LENGKAP                    ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝\n");
+
+        // Menampilkan Makanan
+        ArrayList<MenuItem> makanan = filteredMenuByType("Makanan");
+        if (!makanan.isEmpty()) {
+            System.out.println("🍽️  MAKANAN:");
+            System.out.println("─".repeat(65));
+            tampilMenuItems(makanan);
+        }
+
+        // Menampilkan Minuman
+        ArrayList<MenuItem> minuman = filteredMenuByType("Minuman");
+        if (!minuman.isEmpty()) {
+            System.out.println("\n🥤 MINUMAN:");
+            System.out.println("─".repeat(65));
+            tampilMenuItems(minuman);
+        }
+
+        // Menampilkan Diskon
+        ArrayList<MenuItem> diskon = filteredMenuByType("Diskon");
+        if (!diskon.isEmpty()) {
+            System.out.println("\n🎉 DISKON & PROMO:");
+            System.out.println("─".repeat(65));
+            tampilMenuItems(diskon);
+        }
+    }
+
+    /**
+     * Helper method untuk menampilkan item menu dalam format tabel
+     */
+    private void tampilMenuItems(ArrayList<MenuItem> items) {
+        int no = 1;
+        for (MenuItem item : items) {
+            if (item instanceof Makanan) {
+                Makanan m = (Makanan) item;
+                System.out.printf("%d. %-20s | Rp %,10.0f | %s\n", no++, m.getNama(), m.getHarga(), m.getJenisMakanan());
+            } else if (item instanceof Minuman) {
+                Minuman mi = (Minuman) item;
+                System.out.printf("%d. %-20s | Rp %,10.0f | %s\n", no++, mi.getNama(), mi.getHarga(), mi.getJenisMinuman());
+            } else if (item instanceof Diskon) {
+                Diskon d = (Diskon) item;
+                System.out.printf("%d. %-20s | Min: Rp %,8.0f | Diskon: %.2f%%\n", no++, d.getNama(), d.getHarga(), d.getPersentaseDiskon());
+            }
+        }
+    }
+
+    /**
+     * Helper method untuk filter menu berdasarkan tipe
+     */
+    private ArrayList<MenuItem> filteredMenuByType(String tipe) {
+        ArrayList<MenuItem> filtered = new ArrayList<>();
+        for (MenuItem item : daftarMenu) {
+            if (tipe.equals("Makanan") && item instanceof Makanan) {
+                filtered.add(item);
+            } else if (tipe.equals("Minuman") && item instanceof Minuman) {
+                filtered.add(item);
+            } else if (tipe.equals("Diskon") && item instanceof Diskon) {
+                filtered.add(item);
+            }
+        }
+        return filtered;
+    }
+
+    /**
+     * Menampilkan semua item menu dengan detail
+     */
+    public void tampilMenuDetail() {
+        if (daftarMenu.isEmpty()) {
+            System.out.println("📋 Menu masih kosong!");
+            return;
+        }
+
+        System.out.println("\n╔═══════════════════════════════════════════════════════════════╗");
+        System.out.println("║              DETAIL SEMUA MENU RESTORAN                      ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════╝\n");
+
+        for (int i = 0; i < daftarMenu.size(); i++) {
+            System.out.println("Menu " + (i + 1) + ":");
+            daftarMenu.get(i).tampilMenu();
+            System.out.println();
+        }
+    }
+
+    /**
+     * Getter untuk ArrayList daftarMenu
+     */
+    public ArrayList<MenuItem> getDaftarMenu() {
+        return daftarMenu;
+    }
+
+    /**
+     * Menyimpan menu ke file
+     */
+    public void simpanMenuKeFile() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_MENU))) {
+            for (MenuItem item : daftarMenu) {
+                writer.println(item.toFileFormat());
+            }
+            System.out.println("✓ Menu berhasil disimpan ke file!");
+        } catch (IOException e) {
+            System.err.println("❌ Gagal menyimpan menu ke file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Memuat menu dari file
+     */
+    public void muatMenuDariFile() {
+        daftarMenu.clear();
+        File file = new File(FILE_MENU);
+        if (!file.exists()) {
+            System.out.println("📝 File menu tidak ditemukan, membuat file baru...");
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    String[] parts = line.split("\\|");
+                    if (parts.length >= 4) {
+                        switch (parts[0]) {
+                            case "MAKANAN":
+                                if (parts.length == 5) {
+                                    daftarMenu.add(new Makanan(parts[1], Double.parseDouble(parts[2]), parts[3], parts[4]));
+                                }
+                                break;
+                            case "MINUMAN":
+                                if (parts.length == 5) {
+                                    daftarMenu.add(new Minuman(parts[1], Double.parseDouble(parts[2]), parts[3], parts[4]));
+                                }
+                                break;
+                            case "DISKON":
+                                if (parts.length == 5) {
+                                    daftarMenu.add(new Diskon(parts[1], Double.parseDouble(parts[2]), parts[3], Double.parseDouble(parts[4])));
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+            System.out.println("✓ Menu berhasil dimuat dari file!");
+        } catch (IOException e) {
+            System.err.println("❌ Gagal memuat menu dari file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Getter ukuran menu
+     */
+    public int getUkuranMenu() {
+        return daftarMenu.size();
+    }
+}
